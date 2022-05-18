@@ -42,7 +42,6 @@ contract Campaign {
 
        //You can use the syntax above to initiliaze the struct or use the below
        //Request(description, value, recipient, false);...but the above is recommended
-
        requests.push(request);
     }
 
