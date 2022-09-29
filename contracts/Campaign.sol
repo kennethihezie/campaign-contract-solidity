@@ -1,12 +1,14 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.4;
+import "hardhat/console.sol";
 
 
 contract Campaign {
-   address public manager;
-   uint minimumContribution;
-   mapping(address => bool) public approvers;
-   Request[] public requests;
+    address public manager;
+    uint minimumContribution;
+    mapping(address => bool) public approvers;
+    uint public approversCount;
+    Request[] public requests;
 
     struct Request {
       string description;
@@ -21,10 +23,10 @@ contract Campaign {
     //state variable for request struct
     mapping (uint => Request) mapRequests;
 
-   modifier restricted(){
+    modifier restricted(){
         require(msg.sender == manager);
         _;
-   }
+    }
 
    constructor(uint minimum){
        manager = msg.sender;
@@ -35,14 +37,13 @@ contract Campaign {
        //msg.value is the amount in wei user is sending
        require(msg.value > minimumContribution, 'some eth is required to be an approver');
        approvers[msg.sender] = true;
+       approversCount++;
     }
 
     function createRequest(string memory description, uint value, address recipient) public restricted {
-       //use this approach when you have a map field in a struct.
+      //use this approach when you have a map field in a struct.
        requestsIndex++;
 
-       //pushing requst into the requests array.
-       requests.push();
 
        Request storage request = mapRequests[requestsIndex];
        request.description = description;
@@ -51,18 +52,10 @@ contract Campaign {
        request.complete = false;
        request.approvalCount = 0;
 
-       //check if the sender is an approver
-       //  Request memory request = Request({
-       //    description: description,
-       //    value: value,
-       //    recipient: recipient,
-       //    complete: false,
-       //    approvalCount: 0
-       //  });
+       requests.push();
 
-       //You can use the syntax above to initiliaze the struct or use the below
-       //Request(description, value, recipient, false);...but the above is recommended
-       //requests.push(request);
+       //pushing requst into the requests array.
+       console.log("Request %s", requests[0].description);
     }
 
     function approveRequest(uint index) public {
@@ -74,7 +67,15 @@ contract Campaign {
       request.approvalCount++;
     }
 
-  //  function getAllApprovers() public view returns(mapping(address => bool) memory data){
-  //      return approvers;
-  //  }
+    function finalizeRequest(uint index) public restricted {
+      Request storage request = requests[index];
+
+      require(!request.complete, "request has been completed");
+      require(request.approvalCount > (approversCount / 2));
+
+      //send the money to the recipient address.
+      payable(request.recipient).transfer(request.value);
+
+      request.complete = true;
+    }
 }
