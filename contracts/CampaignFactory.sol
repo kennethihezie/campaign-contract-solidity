@@ -8,7 +8,7 @@ contract CampaignFactory {
   function deployContract(uint minimumContribution) public payable {
       //This deploy the campaign contract on the blockchain
       Campaign newCampaign = new Campaign(msg.sender, minimumContribution);
-      deployedContracts.push(newCampaign);
+      deployedContracts.push(address(newCampaign));
   }
 
   function getAllDeployedContracts() public view returns(address[] memory contracts) {
