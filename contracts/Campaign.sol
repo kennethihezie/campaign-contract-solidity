@@ -75,7 +75,6 @@ contract Campaign {
 
       //send the money to the recipient address.
       payable(request.recipient).transfer(request.value);
-
       request.complete = true;
     }
 }
