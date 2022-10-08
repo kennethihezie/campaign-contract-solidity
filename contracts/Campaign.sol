@@ -3,6 +3,8 @@ pragma solidity ^0.8.4;
 import "hardhat/console.sol";
 
 
+
+
 contract Campaign {
     address public manager;
     uint minimumContribution;
@@ -28,8 +30,8 @@ contract Campaign {
         _;
     }
 
-   constructor(uint minimum){
-       manager = msg.sender;
+   constructor(address owner, uint minimum){
+       manager = owner;
        minimumContribution = minimum;
     }
 
