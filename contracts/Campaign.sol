@@ -1,6 +1,5 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.4;
-import "hardhat/console.sol";
 
 contract Campaign {
     address public manager;
@@ -8,6 +7,7 @@ contract Campaign {
     mapping(address => bool) public approvers;
     uint public approversCount;
     Request[] public requests;
+    mapping (address => bool) public approverState;
 
     struct Request {
       string description;
@@ -15,12 +15,7 @@ contract Campaign {
       address recipient;
       bool complete;
       uint approvalCount;
-      mapping (address => bool) approvals;
     }
-
-    uint requestsIndex;
-    //state variable for request struct
-    mapping (uint => Request) mapRequests;
 
     modifier restricted(){
         require(msg.sender == manager);
@@ -40,29 +35,24 @@ contract Campaign {
     }
 
     function createRequest(string memory description, uint value, address recipient) public restricted {
-      //use this approach when you have a map field in a struct.
-       requestsIndex++;
+      Request memory request =  Request({
+        description: description,
+        value: value,
+        recipient: recipient,
+        complete: false,
+        approvalCount: 0
+      });
 
-
-       Request storage request = mapRequests[requestsIndex];
-       request.description = description;
-       request.value = value;
-       request.recipient = recipient;
-       request.complete = false;
-       request.approvalCount = 0;
-
-       requests.push();
-
-       //pushing requst into the requests array.
-       console.log("Request %s", requests[0].description);
+      requests.push(request);
+      approverState[recipient] = false;
     }
 
     function approveRequest(uint index) public {
       Request storage request = requests[index];
       require(approvers[msg.sender], 'Not an approver');
-      require(!request.approvals[msg.sender], 'Address has already approved');
+      require(!approverState[msg.sender], 'Address has already approved');
 
-      request.approvals[msg.sender] = true;
+      approverState[msg.sender] = true;
       request.approvalCount++;
     }
 
