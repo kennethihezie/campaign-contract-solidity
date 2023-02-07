@@ -1,12 +1,15 @@
 const { web3 } = require('hardhat');
-const { abi, bytecode } = require('../config')
+const contractData = require('../config')
 const assert = require('assert');
 
 let accounts;
 let campaignContractFactory
+let campaignContract
 
 beforeEach(async () => {
+    const { abi, bytecode } = await contractData('CampaignFactory')
     accounts = await web3.eth.getAccounts()
+
     campaignContractFactory = await new web3.eth.Contract(abi)
     .deploy({ data: bytecode, arguments: [100] })
     .send({ from: accounts[0], gas: '10000000' })
@@ -18,18 +21,28 @@ describe("Campaign contract", async () => {
          assert.ok(campaignContractFactory.options.address)
       })
 
-      it("Campaign contract deployed", async () => {
+      it("Create Campaign", async () => {
         const deployCampaignContract = await campaignContractFactory.methods.deployContract('100').send({ from: accounts[0] })
-        console.log("contract address: ", deployCampaignContract);
+        const deployedContractAddress = await campaignContractFactory.methods.getAllDeployedContracts().call({ from: accounts[0] })
+        
+        //Get instance of campaign contract
+        const { abi } = await contractData('Campaign')
+        campaignContract = new web3.eth.Contract(abi, deployedContractAddress[0])
+        assert.ok(campaignContract)
      })
 
-      it("Get deployed contracts address", async () => {
+     it("Get deployed campaign address", async () => {
+        const deployedCampaignContract = await campaignContract.options.address
+        assert.ok(deployedCampaignContract)
+      })
+
+      it("Get all deployed campaign address", async () => {
          const deployedContractAddress = await campaignContractFactory.methods.getAllDeployedContracts().call({ from: accounts[0] })
-         console.log("addresses: ", deployedContractAddress);
+         assert.ok(deployedContractAddress)
       })
 
       it("contribute to campaign", async () => {
-
+         // const contribute = await 
       })
 
       it("create request", async () => {

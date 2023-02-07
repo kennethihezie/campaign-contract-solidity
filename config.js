@@ -1,6 +1,8 @@
 const path = require('path')
 const fs = require('fs')
 
-const filePath = path.resolve(__dirname, 'artifacts/contracts', 'CampaignFactory.sol', 'CampaignFactory.json')
-const src = fs.readFileSync(filePath, 'utf8')
-module.exports = JSON.parse(src)
+module.exports = async function contractData(contractFileName){
+    const filePath = path.resolve(__dirname, 'artifacts/contracts', `${contractFileName}.sol`, `${contractFileName}.json`)
+    const src = fs.readFileSync(filePath, 'utf8')
+    return await JSON.parse(src)
+}

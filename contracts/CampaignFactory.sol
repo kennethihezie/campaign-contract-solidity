@@ -1,19 +1,19 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.4;
+pragma solidity >= 0.4.22 <0.9.0;
 import './Campaign.sol';
 
 contract CampaignFactory {
-  address[] public deployedContracts;
+  address[] private deployedContracts;
 
-  function deployContract(uint minimumContribution) public payable returns(address) {
+  function deployContract(uint minimumContribution) public returns(address) {
       //This deploy the campaign contract on the blockchain
-      Campaign newCampaign = new Campaign(msg.sender, minimumContribution);
-      deployedContracts.push(address(newCampaign));
+      address newCampaignAddress = address(new Campaign(msg.sender, minimumContribution));
+      deployedContracts.push(newCampaignAddress);
 
-      return address(newCampaign);
+      return address(newCampaignAddress);
   }
 
-  function getAllDeployedContracts() public view returns(address[] memory contracts) {
+  function getAllDeployedContracts() public view returns(address[] memory) {
     return deployedContracts;
   }
 }
