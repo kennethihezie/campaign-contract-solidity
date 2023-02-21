@@ -3,58 +3,77 @@ const contractData = require('../config')
 const assert = require('assert');
 
 let accounts;
-let campaignContractFactory
-let campaignContract
+let factory
+let campaign
 
 beforeEach(async () => {
     const { abi, bytecode } = await contractData('CampaignFactory')
     accounts = await web3.eth.getAccounts()
 
-    campaignContractFactory = await new web3.eth.Contract(abi)
+    factory = await new web3.eth.Contract(abi)
     .deploy({ data: bytecode, arguments: [100] })
     .send({ from: accounts[0], gas: '10000000' })
+
+    //deploying campaign contract
+    await factory.methods.deployContract('100').send({ from: accounts[0]})
+    const [ address ] = await factory.methods.getAllDeployedContracts().call({ from: accounts[0] })
+    
+    const campaignData = await contractData('Campaign')
+    //Get instance of campaign contract
+    campaign = new web3.eth.Contract(campaignData.abi, address)
 })
 
 describe("Campaign contract", async () => {
 
-      it("CampaignFactory contract deployed", async () => {
-         assert.ok(campaignContractFactory.options.address)
+      it("deploys a factory and campaign: ", async () => {
+         assert.ok(factory.options.address)
+         assert.ok(campaign.options.address)
       })
 
-      it("Create Campaign", async () => {
-        const deployCampaignContract = await campaignContractFactory.methods.deployContract('100').send({ from: accounts[0] })
-        const deployedContractAddress = await campaignContractFactory.methods.getAllDeployedContracts().call({ from: accounts[0] })
-        
-        //Get instance of campaign contract
-        const { abi } = await contractData('Campaign')
-        campaignContract = new web3.eth.Contract(abi, deployedContractAddress[0])
-        assert.ok(campaignContract)
-     })
 
-     it("Get deployed campaign address", async () => {
-        const deployedCampaignContract = await campaignContract.options.address
-        assert.ok(deployedCampaignContract)
+      it("marks called as the campaign manager", async () => {
+         const manager = await campaign.methods.manager().call()
+         assert.equal(accounts[0], manager)
       })
 
-      it("Get all deployed campaign address", async () => {
-         const deployedContractAddress = await campaignContractFactory.methods.getAllDeployedContracts().call({ from: accounts[0] })
-         assert.ok(deployedContractAddress)
+      it("allow people to contribute money and marks them as approvers", async () => {
+         await campaign.methods.contribute().send({from: accounts[1], value: '200'})
+         const isContributor = await campaign.methods.approvers(accounts[1]).call()
+         assert(isContributor)
       })
 
-      it("contribute to campaign", async () => {
-         // const contribute = await 
+      it("requires a minium contribution", async () => {
+          try {
+            await campaign.methods.contribute().send({value: '5', from: accounts[1]})
+            assert(false)
+         } catch (error) {
+            assert(error)
+          }
       })
 
-      it("create request", async () => {
-
+      it("allows a manager to make a payment request", async () => {
+        await campaign.methods.createRequest('Buy Mac M1 chip', '100', accounts[1]).send({from: accounts[0], gas: '1000000'})
+        const request =  await campaign.methods.requests(0).call()
+        console.log(request);
+        assert.equal('Buy Mac M1 chip', request.description)
       })
 
-      it("approve request", async () => {
-        
-      })
+      it("processes requests", async () => {
+         //convet ether to wei
+        await campaign.methods.contribute().send({from: accounts[0], value: web3.utils.toWei('10', 'ether')})
+        await campaign.methods.createRequest('Buy Iphone 14 pro max', web3.utils.toWei('5', 'ether'), accounts[1]).send({from: accounts[0], gas: '1000000'})
 
-      it("finalize request", async () => {
-        
+        await campaign.methods.approveRequest(0).send({from: accounts[0], gas: '1000000'})
+        await campaign.methods.finalizeRequest(0).send({from: accounts[0], gas: '1000000'})
+
+        //get balance of an address
+        let balance = await web3.eth.getBalance(accounts[1])
+        //convert to ether
+        balance = web3.utils.fromWei(balance, 'ether')
+        balance = parseFloat(balance)
+
+        console.log(balance);
+        assert(balance > 104)
       })
 })
 

@@ -22,6 +22,18 @@ task("web3_accounts", "Prints accounts", async (_, { web3 }) => {
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
+
+const memonicPhrase = '{REPLACE_WITH_WALLET_PHRASE}'
+const providerUrl = '{REPLACE_WITH_GOERLI_LINK}'
+
 module.exports = {
-  solidity: "0.8.4",
+  solidity: "0.8.9",
+  networks: {
+    goerli: {
+      url: providerUrl,
+      accounts: {
+        mnemonic: memonicPhrase
+      }
+    }
+  }
 };

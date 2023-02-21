@@ -2,6 +2,9 @@
 pragma solidity >= 0.4.22 <0.9.0;
 
 
+import "hardhat/console.sol";
+
+
 contract Campaign {
     address public manager;
     uint minimumContribution;
@@ -33,6 +36,7 @@ contract Campaign {
        require(msg.value > minimumContribution, 'some eth is required to be an approver');
        approvers[msg.sender] = true;
        approversCount++;
+       console.log("count: %o", approversCount);
     }
 
     function createRequest(string memory description, uint value, address recipient) public restricted {
@@ -67,4 +71,10 @@ contract Campaign {
       payable(request.recipient).transfer(request.value);
       request.complete = true;
     }
+
+    function getApproverCount() public view returns(uint count){
+      count = approversCount;
+      console.log("IN: %o", count);
+      return count;
+    } 
 }
