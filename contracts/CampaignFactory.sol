@@ -6,7 +6,7 @@ contract CampaignFactory {
   address[] private deployedContracts;
 
   function deployContract(uint minimumContribution) public returns(address) {
-      //This deploy the campaign contract on the blockchain
+      // This deploy the campaign contract on the blockchain
       address newCampaignAddress = address(new Campaign(msg.sender, minimumContribution));
       deployedContracts.push(newCampaignAddress);
 

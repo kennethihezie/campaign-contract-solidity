@@ -7,8 +7,11 @@ const deploy = async () => {
     const result = await new web3.eth.Contract(abi)
          .deploy({ data: bytecode })
          .send({ gas: '10000000', from: accounts[0] })
+
     console.log('Contracts deployed at: ' + result.options.address);
 }
 
-// Deployed at: 0x1f410C7A23b2bcFd32c22439Fbb626a2271075f7
+// npx hardhat run scripts/deploy.js --network sepolia
+
+// Deployed at: 0x3ed2F1C3c1c95A6Ac83569918d3b9F0dc540AECd
 deploy()
