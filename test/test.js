@@ -15,7 +15,7 @@ beforeEach(async () => {
     .send({ from: accounts[0], gas: '10000000' })
 
     //deploying campaign contract
-    await factory.methods.deployContract('100').send({ from: accounts[0]})
+    await factory.methods.createCampaign('100').send({ from: accounts[0]})
     const [ address ] = await factory.methods.getAllDeployedContracts().call({ from: accounts[0] })
     
     const campaignData = await contractData('Campaign')

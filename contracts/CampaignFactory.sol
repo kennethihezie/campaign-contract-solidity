@@ -5,7 +5,7 @@ import './Campaign.sol';
 contract CampaignFactory {
   address[] private deployedContracts;
 
-  function deployContract(uint minimumContribution) public returns(address) {
+  function createCampaign(uint minimumContribution) public returns(address) {
       // This deploy the campaign contract on the blockchain
       address newCampaignAddress = address(new Campaign(msg.sender, minimumContribution));
       deployedContracts.push(newCampaignAddress);

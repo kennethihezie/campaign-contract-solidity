@@ -76,4 +76,20 @@ contract Campaign {
       count = approversCount;
       return count;
     } 
+
+    function getSummary() public view  returns (
+      uint, uint, uint, uint, address
+    ) {
+      return (
+        minimumContribution,
+        address(this).balance,
+        requests.length,
+        approversCount,
+        manager
+      );
+    }
+
+    function getRequestCount() public view  returns (uint) {
+       return requests.length;
+    }
 }

@@ -13,5 +13,5 @@ const deploy = async () => {
 
 // npx hardhat run scripts/deploy.js --network sepolia
 
-// Deployed at: 0x3ed2F1C3c1c95A6Ac83569918d3b9F0dc540AECd
+// Deployed at: 0x3b25194228E6a836487952C87d50d664A4E8DE34
 deploy()
