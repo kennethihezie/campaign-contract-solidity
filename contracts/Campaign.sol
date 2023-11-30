@@ -92,4 +92,8 @@ contract Campaign {
     function getRequestCount() public view  returns (uint) {
        return requests.length;
     }
+
+    function getRequests() external view returns (Request[] memory) {
+      return requests;
+    }
 }
